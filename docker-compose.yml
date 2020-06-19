@@ -1,0 +1,42 @@
+version: "2.3"
+
+services:
+    producer-service:
+        image: producer
+        ports:
+            - 9001:9001
+        build:
+            context: ./producer
+        mem_limit: 500m
+
+    consumer-service:
+        image: consumer
+        ports:
+            - 9000:9000
+        build:
+            context: ./consumer
+
+    zookeeper:
+        image: wurstmeister/zookeeper
+        container_name: zookeeper
+        ports:
+            - "2181:2181"
+    kafka:
+        image: wurstmeister/kafka
+        ports:
+            - "9092:9092"
+        container_name: kafka
+        environment:
+            KAFKA_BROKER_ID: 1
+            KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+            KAFKA_LISTENERS: PLAINTEXT://:9092
+            KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://:9092
+            KAFKA_DELETE_TOPIC_ENABLE: "true"
+        volumes:
+            - kafka-data:/kafka
+        depends_on:
+            - zookeeper
+
+
+volumes:
+    kafka-data:
